@@ -1,0 +1,26 @@
+{
+  "name": "node-blog",
+  "version": "1.0.0",
+  "description": "node-blog",
+  "main": "bin/www.js",
+  "scripts": {
+    "dev": "cross-env NODE_ENV=dev nodemon bin/www.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lycHub/node-blog.git"
+  },
+  "keywords": [
+    "node"
+  ],
+  "author": "Li",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/lycHub/node-blog/issues"
+  },
+  "homepage": "https://github.com/lycHub/node-blog#readme",
+  "devDependencies": {
+    "cross-env": "^5.2.0",
+    "nodemon": "^1.19.1"
+  }
+}
