@@ -1,7 +1,7 @@
 const { getList, getDetail, newBlog, updateBlog, delBlog } = require('../controller/blog');
 const { SuccessModel, ErrorModel } = require('../model/resModel');
 
-function handleBlogRouter (req,res) {
+function handleBlogRouter (req, res) {
   const { method } = req;
   const path = req.path;
   const id = req.query.id;

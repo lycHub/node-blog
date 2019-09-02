@@ -1,6 +1,4 @@
 function getList(author, keyword) {
-  console.log('author :', author);
-  console.log('keyword :', keyword);
   return [
     {
       id: 1,

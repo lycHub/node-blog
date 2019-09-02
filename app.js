@@ -22,7 +22,7 @@ function serverHandle (req, res){
   req.query = querystring.parse(url.split('?')[1]);
 
   getPostData(req, function(postData) {
-    req.body = JSON.parse(postData);
+    req.body = postData;
     const blogData = handleBlogRouter(req, res);
     const userData = handleUserRouter(req, res);
     if (blogData) {
