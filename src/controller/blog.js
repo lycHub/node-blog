@@ -1,39 +1,39 @@
+const { exec } = require('../db/mysql');
 function getList(author, keyword) {
-  return [
-    {
-      id: 1,
-      title: '博客1',
-      content: '内容1',
-      author: 'zhangsan',
-      createTime: Date.now()
-    },
-    {
-      id: 2,
-      title: '博客2',
-      content: '内容2',
-      author: 'lisi',
-      createTime: 1566873198520
-    }
-  ]
+  // 1 = 1 是个占位的手段，如果author、keyword都不存在，那么xx where order xx将会报错
+  let sql = `select * from blogs where 1 = 1 `;
+  if (author) {
+    sql += `and author = '${author}' `;
+  }
+  if (keyword) {
+    sql += `and title like '%${keyword}%' `;
+  }
+  sql += 'order by createtime desc';
+  return exec(sql);
 }
 
 
 function getDetail(id) {
-  return {
-    id: 1,
-    title: '博客1',
-    content: '内容1',
-    author: 'zhangsan',
-    createTime: Date.now()
-  }
+  const sql = `select * from blogs where id = '${id}'`;
+  return exec(sql).then(rows => rows[0]);
 }
 
 
 function newBlog(blogData = {}) {
   console.log('new Bolg data :', blogData);
-  return {
-    id: 3
-  }
+  const { title, content, author = 'Madao' } = blogData;
+  const createtime = Date.now();
+  const sql = `
+    insert into blogs (title, content, createtime, author)
+    values ('${title}', '${content}', ${createtime}, '${author}')
+  `;
+
+  return exec(sql).then(insertResult => {
+    console.log('insertResult', insertResult);
+    return {
+      id: insertResult.insertId
+    }
+  })
 }
 
 function updateBlog(blogData = {}) {
