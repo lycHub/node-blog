@@ -20,11 +20,21 @@ function handleBlogRouter (req, res) {
       // req.body.author = 'Madao';
       return newBlog(req.body).then(data => new SuccessModel(data));
     }else if (path === '/api/blog/update') {
-      const result = updateBlog(req.body);
-      return result ? new SuccessModel(result) : new ErrorModel('更新失败');
+      return updateBlog(req.body).then(res => {
+        if (res) {
+          return new SuccessModel();
+        } else {
+          return new ErrorModel('更新失败');
+        }
+      });
     }else if (path === '/api/blog/del') {
-      const result = delBlog(req.body.id);
-      return result ? new SuccessModel(result) : new ErrorModel('删除失败');
+      return delBlog(req.body).then(res => {
+        if (res) {
+          return new SuccessModel();
+        } else {
+          return new ErrorModel('删除失败');
+        }
+      });
     }
   }
 }

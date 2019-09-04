@@ -29,21 +29,24 @@ function newBlog(blogData = {}) {
   `;
 
   return exec(sql).then(insertResult => {
-    console.log('insertResult', insertResult);
+    // console.log('insertResult', insertResult);
     return {
       id: insertResult.insertId
     }
-  })
+  });
 }
 
 function updateBlog(blogData = {}) {
+  const { id, title, content } = blogData;
   console.log('updateBlog data :', blogData);
-  return true;
+  const sql = `update blogs set title = '${title}', content = '${content}' where id = ${id}`;
+  return exec(sql).then(updateResult => updateResult.affectedRows > 0);
 }
 
-function delBlog(id) {
-  console.log('delBlog :', id);
-  return true;
+function delBlog(blogData = {}) {
+  const { id, author = 'Madao' } = blogData;
+  const sql = `delete from blogs where id = ${id} and author = '${author}'`;
+  return exec(sql).then(updateResult => updateResult.affectedRows > 0);
 }
 
 module.exports = {

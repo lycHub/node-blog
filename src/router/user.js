@@ -7,8 +7,9 @@ function handleUserRouter (req,res) {
   // 路由
   if (method === 'POST' && path === '/api/user/login') {
     const { username, password } = req.body;
-    const result = loginCheck(username, password);
-    return result ? new SuccessModel(result) : new ErrorModel('登录失败');
+    return loginCheck(username, password).then(data => {
+      return data.username ? new SuccessModel() : new ErrorModel('登录失败');
+    });
   }
 }
 
