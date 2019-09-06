@@ -1,4 +1,6 @@
 const { exec } = require('../db/mysql');
+const xss = require('xss');
+
 function getList(author, keyword) {
   // 1 = 1 是个占位的手段，如果author、keyword都不存在，那么xx where order xx将会报错
   let sql = `select * from blogs where 1 = 1 `;
@@ -21,11 +23,12 @@ function getDetail(id) {
 
 function newBlog(blogData = {}) {
   console.log('new Bolg data :', blogData);
-  const { title, content, author = 'Madao' } = blogData;
+  const { title, content, author } = blogData;
   const createtime = Date.now();
+  // 给title字段防xss攻击
   const sql = `
     insert into blogs (title, content, createtime, author)
-    values ('${title}', '${content}', ${createtime}, '${author}')
+    values ('${xss(title)}', '${content}', ${createtime}, '${author}')
   `;
 
   return exec(sql).then(insertResult => {
@@ -44,7 +47,7 @@ function updateBlog(blogData = {}) {
 }
 
 function delBlog(blogData = {}) {
-  const { id, author = 'Madao' } = blogData;
+  const { id, author } = blogData;
   const sql = `delete from blogs where id = ${id} and author = '${author}'`;
   return exec(sql).then(updateResult => updateResult.affectedRows > 0);
 }

@@ -17,9 +17,17 @@ function handleBlogRouter (req, res) {
     
   }else if (method === 'POST') {
     if (path === '/api/blog/new') {
-      // req.body.author = 'Madao';
+      const loginCheckRes = loginCheck(req);
+      if (loginCheckRes) {
+        return loginCheckRes;
+      }
+      req.body.author = req.session.username;
       return newBlog(req.body).then(data => new SuccessModel(data));
     }else if (path === '/api/blog/update') {
+      const loginCheckRes = loginCheck(req);
+      if (loginCheckRes) {
+        return loginCheckRes;
+      }
       return updateBlog(req.body).then(res => {
         if (res) {
           return new SuccessModel();
@@ -28,6 +36,11 @@ function handleBlogRouter (req, res) {
         }
       });
     }else if (path === '/api/blog/del') {
+      const loginCheckRes = loginCheck(req);
+      if (loginCheckRes) {
+        return loginCheckRes;
+      }
+      req.body.author = req.session.username;
       return delBlog(req.body).then(res => {
         if (res) {
           return new SuccessModel();
@@ -36,6 +49,14 @@ function handleBlogRouter (req, res) {
         }
       });
     }
+  }
+}
+
+
+// 登录验证
+function loginCheck(req) {
+  if (!req.session.username) {
+    return Promise.resolve(new ErrorModel('未登录'));
   }
 }
 

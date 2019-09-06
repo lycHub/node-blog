@@ -1,10 +1,11 @@
-const { exec } = require('../db/mysql');
-function loginCheck(username, password) {
-  const sql = `select username, realname from users where username = '${username}' and password = '${password}'`;
-  return exec(sql).then(rows => {
+const {genPassword} = require("../utils/cryp");
 
+const { exec } = require('../db/mysql');
+function login(username, password) {
+  const sql = `select username, realname from users where username = '${username}' and password = '${genPassword(password)}'`;
+  return exec(sql).then(rows => {
     return rows[0] || {};
   });
 }
 
-module.exports = { loginCheck };
+module.exports = { login };
