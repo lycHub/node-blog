@@ -26,11 +26,3 @@ function exec(sql) {
 module.exports = {
   exec
 }
-
-
-/*
-// 要保持连接
-con.end(function(error) {
-  if (error) throw error;
-  console.log('连接结束');
-});*/

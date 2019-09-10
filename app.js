@@ -1,112 +1,75 @@
-const {get, set} = require("./src/db/redis");
+var createError = require('http-errors');
+var express = require('express');
+var path = require('path');
+var cookieParser = require('cookie-parser');
+var lessMiddleware = require('less-middleware');
+var logger = require('morgan');
+const session = require('express-session');
+const RedisStore = require('connect-redis')(session);
+const fs = require('fs');
+var indexRouter = require('./routes/index');
+const userRouter = require('./routes/user');
+const blogRouter = require('./routes/blog');
 
-const querystring = require('querystring');
-const handleBlogRouter = require('./src/router/blog');
-const handleUserRouter = require('./src/router/user');
-const { access } = require('./src/utils/log');
+var app = express();
 
-function getPostData(req, cb) {
-  if (req.method !== 'POST') {
-    cb({});
-    return;
-  }
-  if (req.headers['content-type'] !== 'application/json') {
-    cb({});
-    return;
-  }
-  let result = '';
-  req.on('data', chunk => result += chunk);
-  req.on('end', () => {
-    result = result.toString();
-    cb(JSON.parse(result));
-  });
+// view engine setup
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
+
+if (process.env.NODE_ENV === 'dev') {
+  app.use(logger('dev'));
+}else {
+  const logFileName = path.join(__dirname, 'logs', 'access.log');
+  const writeStream = fs.createWriteStream(logFileName, { flags: 'a' });
+  app.use(logger('combined', {
+    stream: writeStream   // 默认是直接写入控制台
+  }));
 }
 
+app.use(express.json());
 
-function serverHandle (req, res){
-  // 写日志
-  access(`${req.method} -- ${req.url} -- ${req.headers['user-agent']} -- ${Date.now()}`);
+const client = require('./db/redis');
+const sessionStore = new RedisStore({ client });
 
+app.use(session({
+  secret: 'Madao_2019_',
 
-  res.setHeader('Content-Type', 'application/json');
-  const url = req.url;
-  req.path = url.split('?')[0];
-  req.query = querystring.parse(url.split('?')[1]);
+  // 设置cookie
+  cookie: {
+    // path: '/',
+    // httpOnly: true,
+    maxAge: 24 * 60 * 60 * 1000
+  },
+  store: sessionStore
+}));
 
-  // 解析cookie
-  req.cookie = {};
-  const cookieStr = req.headers.cookie || '';
-  cookieStr.split(';').forEach(item=>{
-    if (item) {
-      const arr=item.split('=');
-      const key=arr[0].trim();
-      const val =arr[1].trim();
-      req.cookie[key]=val;
-    }
-  });
+// 解析表单提交的数据
+app.use(express.urlencoded({ extended: false }));
+app.use(cookieParser());
+app.use(lessMiddleware(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
+// 这里定义的是根路由
+app.use('/', indexRouter);
 
-  // 解析session
-  let userId = req.cookie.userid;
-  let needSetCookie = false;
-  if (!userId) {
-    needSetCookie = true;
-    userId = Date.now() + '_' + Math.random();
-    set(userId, {});    // 设置redis
-  }
-  req.sessionId = userId;
-  get(req.sessionId).then(sessionData => {
-    if (sessionData) {
-      req.session = sessionData;
-    }else {
-      set(req.sessionId, {});
-      req.session = {};
-    }
-    console.log('session', req.session);
-    getPost();
-  });
+app.use('/api/blog', blogRouter);
+app.use('/api/user', userRouter);
 
-  function getPost() {
-    getPostData(req, function (postData) {
-      req.body = postData;
-      const blogResult = handleBlogRouter(req, res);
-      const userResult = handleUserRouter(req, res);
-      if (blogResult) {
-        blogResult.then(blogData => {
-          if (needSetCookie) {
-            res.setHeader('Set-Cookie', `userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`);
-          }
-          res.end(JSON.stringify(blogData));
-        });
-        return;
-      }
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  next(createError(404));
+});
 
-      if (userResult) {
-        userResult.then(userData => {
-          if (needSetCookie) {
-            res.setHeader('Set-Cookie', `userid=${userId}; path=/; httpOnly; expires=${getCookieExpires()}`);
-          }
-          res.end(JSON.stringify(userData));
-        });
-        return;
-      }
+// error handler
+app.use(function(err, req, res, next) {
+  // set locals, only providing error in development
+  res.locals.message = err.message;
+  res.locals.error = req.app.get('env') === 'dev' ? err : {};
 
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('page is not found');
-    });
-  }
+  // render the error page
+  res.status(err.status || 500);
+  res.render('error');
+});
 
-
-}
-
-
-// 获取cookie过期时间
-function getCookieExpires() {
-  const d = new Date();
-  d.setTime(d.getTime() + (24 * 60 * 60 * 1000));
-  console.log('toGMTString', d.toGMTString());
-  return d.toGMTString();
-}
-
-
-module.exports = serverHandle;
+module.exports = app;

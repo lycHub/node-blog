@@ -1,30 +1,24 @@
 {
-  "name": "node-blog",
-  "version": "1.0.0",
-  "description": "node-blog",
-  "main": "bin/www.js",
+  "name": "exp-blog",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "dev": "cross-env NODE_ENV=dev nodemon bin/www.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lycHub/node-blog.git"
-  },
-  "keywords": [
-    "node"
-  ],
-  "author": "Li",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/lycHub/node-blog/issues"
-  },
-  "homepage": "https://github.com/lycHub/node-blog#readme",
-  "devDependencies": {
-    "cross-env": "^5.2.0",
-    "nodemon": "^1.19.1"
+    "start": "cross-env NODE_ENV=dev nodemon ./bin/www",
+    "build": "cross-env NODE_ENV=prod node ./bin/www"
   },
   "dependencies": {
+    "connect-redis": "^4.0.2",
+    "cookie-parser": "~1.4.4",
+    "cross-env": "^5.2.1",
+    "debug": "~2.6.9",
+    "ejs": "~2.6.1",
+    "express": "~4.16.1",
+    "express-session": "^1.16.2",
+    "http-errors": "~1.6.3",
+    "less-middleware": "~2.2.1",
+    "morgan": "~1.9.1",
     "mysql": "^2.17.1",
+    "nodemon": "^1.19.2",
     "redis": "^2.8.0",
     "xss": "^1.0.6"
   }

@@ -1,2 +1,0 @@
-# node-blog
-node-blog
